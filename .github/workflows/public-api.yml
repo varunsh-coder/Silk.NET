@@ -14,15 +14,20 @@ jobs:
     Check:
         runs-on: windows-latest
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/checkout@v2
+            - name: Harden Runner
+              uses: step-security/harden-runner@dd2c410b088af7c0dc8046f3ac9a8f4148492a95
+              with:
+                egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+            - uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+            - uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
               name: Checkout PR
               if: ${{ github.repository == 'dotnet/Silk.NET' && github.event_name == 'pull_request_target' }}
               with:
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   path: inbound_pr
                   ref: ${{ github.event.pull_request.head.ref }}
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
               name: Checkout branch
               if: ${{ github.repository == 'dotnet/Silk.NET' && github.event_name != 'pull_request_target' }}
               with:
@@ -32,14 +37,14 @@ jobs:
                   cd inbound_pr
                   git -c submodule.third_party/git-hooks.update=none submodule update --init --recursive
             - name: Cache .tmp, ~/.nuget/packages
-              uses: actions/cache@v2
+              uses: actions/cache@661fd3eb7f2f20d8c7c84bc2b0509efd7a826628
               with:
                   path: |
                       .tmp
                       ~/.nuget/packages
                   key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
             - name: Setup .NET 6.0
-              uses: actions/setup-dotnet@v1
+              uses: actions/setup-dotnet@608ee757cfcce72c2e91e99aca128e0cae67de87
               with:
                   dotnet-version: 6.0.201
             - name: Install Workloads for Restore
@@ -53,7 +58,12 @@ jobs:
         if: ${{ github.repository == 'dotnet/Silk.NET' && github.event_name == 'create' }}
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - name: Harden Runner
+              uses: step-security/harden-runner@dd2c410b088af7c0dc8046f3ac9a8f4148492a95
+              with:
+                egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+            - uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
               with:
                   token: ${{ secrets.PUSHABLE_GITHUB_TOKEN }}
             - name: Checkout submodules, configure git
@@ -62,14 +72,14 @@ jobs:
                   git config --local user.email "9011267+dotnet-bot@users.noreply.github.com"
                   git config --local user.name "The Silk.NET Automaton" 
             - name: Cache .tmp, ~/.nuget/packages
-              uses: actions/cache@v2
+              uses: actions/cache@661fd3eb7f2f20d8c7c84bc2b0509efd7a826628
               with:
                   path: |
                       .tmp
                       ~/.nuget/packages
                   key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
             - name: Setup .NET 6.0
-              uses: actions/setup-dotnet@v1
+              uses: actions/setup-dotnet@608ee757cfcce72c2e91e99aca128e0cae67de87
               with:
                   dotnet-version: 6.0.201
             - name: Ship Public API
