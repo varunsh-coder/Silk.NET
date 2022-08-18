@@ -6,12 +6,20 @@ on:
   pull_request:
     paths:
       - "CODEOWNERS"
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
 jobs:
   Validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: mszostok/codeowners-validator@v0.6.0
+      - name: Harden Runner
+        uses: step-security/harden-runner@dd2c410b088af7c0dc8046f3ac9a8f4148492a95
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+      - uses: mszostok/codeowners-validator@2f6e3bb39aa6837d7dcf8eff2de5d6c046d0c9a9
         with:
           checks: "files,duppatterns"
           experimental_checks: "notowned"
