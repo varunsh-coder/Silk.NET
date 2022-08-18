@@ -1,4 +1,4 @@
-<!-- Begin exclude from NuGet readme. -->
+<!-- Begin exclude from NuGet readme. change to test -->
 <h1 align="center">
     <a href="#"><img align="center" src="documentation/readme/silkdotnet_v3_horizontal_96.svg"></a>
     <br />
