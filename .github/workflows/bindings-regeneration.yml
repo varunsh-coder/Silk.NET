@@ -4,17 +4,28 @@ on:
   schedule:
     - cron: '0 0 * * Fri'
 
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
 jobs:
   build:
 
+    permissions:
+      contents: write  # for gr2m/create-or-update-pull-request-action to push local changes
+      pull-requests: write  # for gr2m/create-or-update-pull-request-action to create a PR
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Harden Runner
+      uses: step-security/harden-runner@dd2c410b088af7c0dc8046f3ac9a8f4148492a95
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+    - uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
       with:
         submodules: 'recursive'
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@608ee757cfcce72c2e91e99aca128e0cae67de87
       with:
         dotnet-version: 3.1.302
     - name: Run a full run of BuildTools
@@ -23,7 +34,7 @@ jobs:
       id: date
       run: echo "::set-output name=date::$(date +'%d-%m-%Y')"
     - name: Create or Update Pull Request
-      uses: gr2m/create-or-update-pull-request-action@master
+      uses: gr2m/create-or-update-pull-request-action@466b1b84c3291c6c69bc56377a6de54a1f4a297c
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
