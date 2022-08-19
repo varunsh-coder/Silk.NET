@@ -8,6 +8,9 @@ on:
         - "ci/*"
         - "develop/*"
         - "main"
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
 jobs:
   Build:
     strategy: 
@@ -31,7 +34,12 @@ jobs:
     name: ${{ matrix.env.name }} Build
     runs-on: ${{ matrix.env.os }}
     steps:
-      - uses: actions/checkout@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@dd2c410b088af7c0dc8046f3ac9a8f4148492a95
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
         with:
           token: ${{ secrets.PUSHABLE_GITHUB_TOKEN }}
       - name: Checkout submodules, configure git
@@ -44,14 +52,14 @@ jobs:
           echo running extras
           ${{ matrix.env.extras }}
       - name: Cache .tmp, ~/.nuget/packages
-        uses: actions/cache@v2
+        uses: actions/cache@661fd3eb7f2f20d8c7c84bc2b0509efd7a826628
         with:
           path: |
             .tmp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
       - name: Setup .NET 6.0
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@608ee757cfcce72c2e91e99aca128e0cae67de87
         with:
           dotnet-version: 6.0.201
       - name: Build Vulkan Loader
